@@ -1,0 +1,36 @@
+type NotFound {
+    reason: String
+}
+
+type InvalidToken {
+    reason: String
+}
+
+type AlreadyExists {
+    reason: String
+}
+
+type Login {
+    QRCode: String!
+}
+
+type Register {
+    QRCode: String!
+}
+
+union LoginResult = Login | NotFound
+
+union RegisterResult = Register | AlreadyExists
+
+
+type Mutation {
+    register(email: String!): RegisterResult
+    validate(email: String!, token:String!): String
+    login(email: String!): LoginResult
+}
+
+type Query {
+    ok(email: String!): String
+}
+
+

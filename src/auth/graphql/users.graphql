@@ -1,0 +1,34 @@
+
+type User {
+    # The database user
+    id: ID!
+    # The enmail of the user
+    email: String!
+    # The name of the user
+    name: String
+    # The phone of the user
+    phone: String
+    # The photo of the user
+    photo: String
+    # Is the user deleted?
+    delete: Boolean
+    # user roles
+    roles: [String!]!
+
+}
+
+input  UserInput {
+    # The database user
+    id: ID!
+    # The name of the user
+    name: String
+    # The phone of the user
+    phone: String
+    # The photo of the user
+    photo: String
+    # Is the user deleted?
+    delete: Boolean
+    # user roles
+    roles: [String]
+}
+
