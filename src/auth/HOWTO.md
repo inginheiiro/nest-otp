@@ -13,6 +13,16 @@ mutation {
 }
 ```
 
+## login google user 
+
+```GraphQl
+
+mutation {
+  googleLogin(tokenId: "GoogleAuthTokenID") 
+}
+```
+
+
 ## login user 
 
 ```GraphQl

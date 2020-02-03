@@ -9,6 +9,7 @@ import {Email} from '../common/utils/mail';
 import {InjectModel} from '@nestjs/mongoose';
 import {Users} from './interfaces/users.interface';
 import {Model} from 'mongoose';
+import {OAuth2Client} from 'google-auth-library';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,8 @@ export class AuthService {
     constructor(
         @InjectModel('Users') private readonly usersModel: Model<Users>,
         private readonly jwtService: JwtService
-    ) {}
+    ) {
+    }
 
 
     /**
@@ -30,6 +32,49 @@ export class AuthService {
     async validateUser(email: string): Promise<User> {
         this.logger.debug(`validating: ${email}`);
         return await this.usersModel.findOne({email});
+    }
+
+
+    /**
+     * GOOGLE login a user by sending and OTP mail code.
+     * @param email
+     */
+
+    async googleLogin(tokenId: string): Promise<string> {
+        this.logger.debug(`Google Login:  ${tokenId}`);
+
+        let ticket = null;
+        try {
+            const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+            ticket = await client.verifyIdToken({
+                idToken: tokenId,
+                audience: process.env.GOOGLE_CLIENT_ID
+            });
+        } catch (e) {
+            console.log('error');
+            throw new AuthenticationError(`Invalid google token!`);
+        }
+
+        let user = await this.usersModel.findOne({email: ticket.getPayload().email});
+
+        if (!user) {
+            user = new this.usersModel({
+                email: ticket.getPayload().email,
+                secretOTP: OTP.authenticator.generateSecret(),
+                name: ticket.getPayload().name,
+                photo: ticket.getPayload().picture
+            });
+            user.save();
+        }
+
+        const payload: any = {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            claims: user.roles.map(p => p)
+        };
+
+        return this.jwtService.sign(payload);
     }
 
     /**
@@ -100,6 +145,7 @@ export class AuthService {
      */
     async validateOTPToken(email: string, token: string): Promise<string> {
 
+        this.logger.debug(`INITIAL Token: ${token} Key!`);
         let user = await this.usersModel.findOne({email});
         let secret = null;
         if (!user) {
@@ -127,6 +173,8 @@ export class AuthService {
         // Invalidate from MemoryCache
         this.cache.del(email);
 
+        this.logger.debug(`VALID Token: ${token} Key!`);
+
         const payload: any = {
             id: user.id,
             email: user.email,
@@ -141,7 +189,7 @@ export class AuthService {
      * @param token
      */
 
-    async validateJWTToken(token: string) :  Promise<any> {
+    async validateJWTToken(token: string): Promise<any> {
         try {
             this.jwtService.verify(token);
             return this.jwtService.decode(token);
@@ -154,7 +202,7 @@ export class AuthService {
     private async generateOTPData(email: string, secret: string): Promise<any> {
 
         OTP.authenticator.options = {
-            step: parseInt(process.env.OTP_STEP,10),
+            step: parseInt(process.env.OTP_STEP, 10),
         };
 
         const otpauth = OTP.authenticator.keyuri(email, 'OTP', secret);
@@ -167,7 +215,6 @@ export class AuthService {
         };
 
     }
-
 
 
 }

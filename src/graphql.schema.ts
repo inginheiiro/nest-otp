@@ -26,19 +26,19 @@ export class Login {
     QRCode: string;
 }
 
-export abstract class IMutation {
-    abstract register(email: string): RegisterResult | Promise<RegisterResult>;
-
-    abstract validate(email: string, token: string): string | Promise<string>;
-
-    abstract login(email: string): LoginResult | Promise<LoginResult>;
-}
-
 export class NotFound {
     reason?: string;
 }
 
 export abstract class IQuery {
+    abstract register(email: string): RegisterResult | Promise<RegisterResult>;
+
+    abstract validate(email: string, token: string): string | Promise<string>;
+
+    abstract login(email: string): LoginResult | Promise<LoginResult>;
+
+    abstract googleLogin(tokenId: string): string | Promise<string>;
+
     abstract ok(email: string): string | Promise<string>;
 }
 

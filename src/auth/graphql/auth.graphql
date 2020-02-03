@@ -23,13 +23,11 @@ union LoginResult = Login | NotFound
 union RegisterResult = Register | AlreadyExists
 
 
-type Mutation {
+type Query {
     register(email: String!): RegisterResult
     validate(email: String!, token:String!): String
     login(email: String!): LoginResult
-}
-
-type Query {
+    googleLogin(tokenId: String!): String
     ok(email: String!): String
 }
 

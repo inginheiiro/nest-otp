@@ -13,19 +13,24 @@ export class AuthResolvers {
     constructor(private readonly authService: AuthService) {
     }
 
-    @Mutation()
+    @Query()
     async register(@Args('email') email: string): Promise<RegisterResult> {
         return await this.authService.register(email);
     }
 
-    @Mutation()
+    @Query()
     async validate(@Args('email') email: string, @Args('token') token: string): Promise<string> {
         return await this.authService.validateOTPToken(email, token);
     }
 
-    @Mutation()
+    @Query()
     async login(@Args('email') email: string): Promise<LoginResult> {
         return await this.authService.login(email);
+    }
+
+    @Query()
+    async googleLogin(@Args('tokenId') tokendId: string): Promise<string> {
+        return await this.authService.googleLogin(tokendId);
     }
 
     @Query()
