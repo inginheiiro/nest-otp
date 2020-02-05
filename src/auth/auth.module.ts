@@ -7,7 +7,7 @@ import {MongooseModule} from '@nestjs/mongoose';
 import {UsersSchema} from './mongo/usersSchema';
 import {LoginResultResolvers} from './resolvers/loginResult.resolvers';
 import {GqlAuthGuard, HttpAuthGuard, WsAuthGuard} from './guards/auth.guard';
-import {EasyconfigModule} from "nestjs-easyconfig";
+import {EasyconfigModule} from 'nestjs-easyconfig';
 
 @Module({
     imports: [

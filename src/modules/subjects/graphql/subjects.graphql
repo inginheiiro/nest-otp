@@ -1,0 +1,10 @@
+scalar Date
+
+type Subject {
+    id: ID!,
+    name: String!
+    description: String,
+    responsibles: [ID!]!
+    start: Date!,
+    end: Date!
+}

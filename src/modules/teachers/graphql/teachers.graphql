@@ -1,0 +1,25 @@
+type Teachers {
+    id: ID!,
+    name: String!
+}
+
+
+input  TeacherInput {
+    # The database user
+    id: ID
+    # The name of the user
+    name: String!
+}
+
+type Query {
+    # Get teachers by ids
+    getTeachersByIds(ids: [String!]): [Teachers]
+
+    # Get teachers by ids
+    getTeachers: [Teachers]
+}
+
+type Mutation {
+    addOrUpdateTeacher(teacher: TeacherInput): Teachers
+    deleteTeacher(id:String):Boolean
+}
