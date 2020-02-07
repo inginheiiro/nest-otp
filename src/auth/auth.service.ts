@@ -7,7 +7,7 @@ import * as OTP from 'otplib';
 import * as QRCode from 'qrcode';
 import {Email} from '../common/utils/mail';
 import {InjectModel} from '@nestjs/mongoose';
-import {Users} from './interfaces/users.interface';
+import {Users} from '../MongoSchemas/interfaces/users.interface';
 import {Model} from 'mongoose';
 import {OAuth2Client} from 'google-auth-library';
 

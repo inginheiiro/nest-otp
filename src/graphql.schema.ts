@@ -5,6 +5,15 @@
  */
 
 /* tslint:disable */
+export class SubjectInput {
+    id?: string;
+    name: string;
+    description: string;
+    teachers?: string[];
+    start: Date;
+    end: Date;
+}
+
 export class TeacherInput {
     id?: string;
     name: string;
@@ -32,6 +41,12 @@ export class Login {
 }
 
 export abstract class IMutation {
+    abstract addOrUpdateSubject(subject?: SubjectInput): Subject | Promise<Subject>;
+
+    abstract joinTeachersToSubject(subjectId: string, teacherIds?: string[]): User[] | Promise<User[]>;
+
+    abstract deleteSubject(id?: string): boolean | Promise<boolean>;
+
     abstract addOrUpdateTeacher(teacher?: TeacherInput): Teachers | Promise<Teachers>;
 
     abstract deleteTeacher(id?: string): boolean | Promise<boolean>;
@@ -52,6 +67,10 @@ export abstract class IQuery {
 
     abstract ok(email: string): string | Promise<string>;
 
+    abstract getSubjectsByIds(ids?: string[]): Subject[] | Promise<Subject[]>;
+
+    abstract getSubjects(): Subject[] | Promise<Subject[]>;
+
     abstract getTeachersByIds(ids?: string[]): Teachers[] | Promise<Teachers[]>;
 
     abstract getTeachers(): Teachers[] | Promise<Teachers[]>;
@@ -62,10 +81,10 @@ export class Register {
 }
 
 export class Subject {
-    id: string;
+    _id: string;
     name: string;
     description?: string;
-    responsibles: string[];
+    teachers?: User[];
     start: Date;
     end: Date;
 }
@@ -76,7 +95,7 @@ export class Teachers {
 }
 
 export class User {
-    id: string;
+    _id: string;
     email: string;
     name?: string;
     phone?: string;

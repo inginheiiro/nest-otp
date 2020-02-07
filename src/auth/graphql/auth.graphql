@@ -23,7 +23,7 @@ union LoginResult = Login | NotFound
 union RegisterResult = Register | AlreadyExists
 
 
-type Query {
+extend type Query {
     register(email: String!): RegisterResult
     validate(email: String!, token:String!): String
     login(email: String!): LoginResult

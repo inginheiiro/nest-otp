@@ -7,7 +7,13 @@ declare const module: any;
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(
+        new ValidationPipe({
+            dismissDefaultMessages: true,
+            disableErrorMessages: true,
+        })
+    );
+
     app.enableCors();
     await app.listen(3000);
 

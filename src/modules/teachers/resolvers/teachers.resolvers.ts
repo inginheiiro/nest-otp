@@ -25,9 +25,6 @@ export class TeachersResolvers {
                 return this.teachersService.findByIds(predicate);
             }))
         );
-
-        console.log(teacherByIdLoader);
-
         return await teacherByIdLoader.load(ids);
     }
 

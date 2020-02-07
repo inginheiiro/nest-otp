@@ -1,7 +1,7 @@
 
 type User {
     # The database user
-    id: ID!
+    _id: ID!
     # The enmail of the user
     email: String!
     # The name of the user

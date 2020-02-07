@@ -4,10 +4,11 @@ import {JwtModule} from '@nestjs/jwt';
 import {AuthResolvers} from './resolvers/auth.resolvers';
 import {RegisterResultResolvers} from './resolvers/registerResult.resolvers';
 import {MongooseModule} from '@nestjs/mongoose';
-import {UsersSchema} from './mongo/usersSchema';
 import {LoginResultResolvers} from './resolvers/loginResult.resolvers';
 import {GqlAuthGuard, HttpAuthGuard, WsAuthGuard} from './guards/auth.guard';
 import {EasyconfigModule} from 'nestjs-easyconfig';
+import {UserService} from './user.service';
+import {UsersSchema} from '../MongoSchemas/schemas/users';
 
 @Module({
     imports: [
@@ -22,6 +23,7 @@ import {EasyconfigModule} from 'nestjs-easyconfig';
     ],
     providers: [
         AuthService,
+        UserService,
         HttpAuthGuard,
         WsAuthGuard,
         GqlAuthGuard,
@@ -29,7 +31,7 @@ import {EasyconfigModule} from 'nestjs-easyconfig';
         RegisterResultResolvers,
         LoginResultResolvers
     ],
-    exports: [AuthService]
+    exports: [AuthService,UserService]
 })
 export class AuthModule {
 }
