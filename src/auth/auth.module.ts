@@ -31,7 +31,7 @@ import {UsersSchema} from '../MongoSchemas/schemas/users';
         RegisterResultResolvers,
         LoginResultResolvers
     ],
-    exports: [AuthService,UserService]
+    exports: [AuthService, UserService]
 })
 export class AuthModule {
 }

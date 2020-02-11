@@ -1,4 +1,4 @@
-import {Schema, model} from 'mongoose';
+import {model, Schema} from 'mongoose';
 import {RolesEnum} from '../rolesEnum';
 
 
@@ -58,3 +58,9 @@ UsersSchema.methods.isStudent = function isStudent() {
 UsersSchema.methods.isTeacher = function isTeacher() {
     return this.roles.find(p => p === RolesEnum.TEACHER);
 };
+
+
+export const UsersModel = model(
+    'Users',
+    UsersSchema
+);

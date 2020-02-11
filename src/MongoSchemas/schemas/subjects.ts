@@ -1,6 +1,4 @@
-import {Schema, model} from 'mongoose';
-import {Users} from '../interfaces/users.interface';
-import {UsersSchema} from './users';
+import {model, Schema} from 'mongoose';
 
 
 export const SubjectSchema = new Schema({
@@ -9,7 +7,7 @@ export const SubjectSchema = new Schema({
         teachers: [
             {
                 type: Schema.Types.ObjectId,
-                ref: model<Users>('users', UsersSchema)
+                ref: 'Users'
             }
         ],
         start: {type: Date, require: true},
@@ -21,16 +19,11 @@ export const SubjectSchema = new Schema({
     }
 );
 
-SubjectSchema.pre('find', function populateTeachers(next) {
-    this.populate('teachers');
-    next();
-});
+export const SubjectModel = model(
+    'Subjects',
+    SubjectSchema
+);
 
 
-
-SubjectSchema.pre('findOne', function populateTeachers(next) {
-    this.populate('teachers');
-    next();
-});
 
 

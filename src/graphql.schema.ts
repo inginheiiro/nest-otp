@@ -43,7 +43,7 @@ export class Login {
 export abstract class IMutation {
     abstract addOrUpdateSubject(subject?: SubjectInput): Subject | Promise<Subject>;
 
-    abstract joinTeachersToSubject(subjectId: string, teacherIds?: string[]): User[] | Promise<User[]>;
+    abstract joinTeachersToSubject(subjectId: string, teacherIds?: string[]): Subject | Promise<Subject>;
 
     abstract deleteSubject(id?: string): boolean | Promise<boolean>;
 

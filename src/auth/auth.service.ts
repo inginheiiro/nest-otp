@@ -7,7 +7,6 @@ import * as OTP from 'otplib';
 import * as QRCode from 'qrcode';
 import {Email} from '../common/utils/mail';
 import {InjectModel} from '@nestjs/mongoose';
-import {Users} from '../MongoSchemas/interfaces/users.interface';
 import {Model} from 'mongoose';
 import {OAuth2Client} from 'google-auth-library';
 
@@ -18,7 +17,7 @@ export class AuthService {
     private readonly cache = new cacheManager.Cache();
 
     constructor(
-        @InjectModel('Users') private readonly usersModel: Model<Users>,
+        @InjectModel('Users') private readonly usersModel: Model,
         private readonly jwtService: JwtService
     ) {
     }

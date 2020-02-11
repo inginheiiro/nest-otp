@@ -1,7 +1,7 @@
 ## Register User Mutation 
 
 ```GraphQl
-mutation {
+query {
   register(email: "XXX@gmail.com") {
     ... on Register {
       QRCode
@@ -16,8 +16,7 @@ mutation {
 ## login google user 
 
 ```GraphQl
-
-mutation {
+query {
   googleLogin(tokenId: "GoogleAuthTokenID") 
 }
 ```
@@ -26,8 +25,7 @@ mutation {
 ## login user 
 
 ```GraphQl
-
-mutation {
+query {
   login(email: "XXX@gmail.com") {
     ... on Login {
       QRCode
@@ -44,8 +42,7 @@ mutation {
 ## Validate OTP Token 
 
 ```GraphQl
-
-mutation {
+query {
   validate(email: "XXX@gmail.com", token: "943639")
 }
 

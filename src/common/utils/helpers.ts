@@ -7,4 +7,13 @@ export class Helpers {
         return copy
     }
 
+    static arrayToObject(array: any, keyField:string ): any {
+        return array.reduce((obj, item) => {
+            obj[item[keyField]] = item
+            return obj
+        });
+    }
+
+
+
 }

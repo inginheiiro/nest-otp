@@ -30,6 +30,6 @@ type Query {
 
 extend type Mutation {
     addOrUpdateSubject(subject: SubjectInput): Subject!
-    joinTeachersToSubject(subjectId: String!, teacherIds: [String!]): [User]
+    joinTeachersToSubject(subjectId: String!, teacherIds: [String!]): Subject
     deleteSubject(id:String):Boolean
 }
