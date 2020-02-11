@@ -38,7 +38,7 @@ http://localhost:3000/graphql
 ## Register new user 
 
 ```GraphQl
-mutation {
+query {
   register(email: "XXX@gmail.com") {
     ... on Register {
       QRCode
@@ -54,7 +54,7 @@ mutation {
 
 ```GraphQl
 
-mutation {
+query {
   login(email: "XXX@gmail.com") {
     ... on Login {
       QRCode
@@ -73,7 +73,7 @@ You can use google authenticator to generate tokens.
 
 ```GraphQl
 
-mutation {
+query {
   validate(email: "XXX@gmail.com", token: "943639")
 }
 
