@@ -56,7 +56,7 @@ export class SubjectResolvers {
         name: 'teacherIds',
         type: () =>[String]
     })teacherIds: string[]): Promise<Subject | null> {
-        return await this.subjectService.joinUsers(subjectId, teacherIds);
+        return await this.subjectService.joinTeachers(subjectId, teacherIds);
     }
 
 

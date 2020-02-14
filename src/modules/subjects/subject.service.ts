@@ -17,9 +17,9 @@ export class SubjectService {
     ) {
     }
 
-    async findByIds(ids: ReadonlyArray<string[]>): Promise<Subject[]> {
+    async findByIds(ids: string[]): Promise<Subject[]> {
         this.logger.debug(`Subject ID's: ${ids}`);
-        return await this.subjectModel.find(ids);
+        return await this.subjectModel.find({_id: {$in: ids}});
     }
 
     async findAll(): Promise<Subject[]> {
@@ -33,7 +33,7 @@ export class SubjectService {
     }
 
 
-    async joinUsers(subjectId: string, teacherIds: string[]): Promise<Subject> {
+    async joinTeachers(subjectId: string, teacherIds: string[]): Promise<Subject> {
         this.logger.debug(`join users by id: ${teacherIds}`);
         const subject = await this.subjectModel.findOne({_id: subjectId}).populate('teachers').exec();
         const uList = await this.usersService.findByIds(teacherIds);
@@ -52,7 +52,7 @@ export class SubjectService {
 
         if (update) {
             this.logger.debug(`Updating Subjects ...`);
-            await subject.updateOne({teachers: subject.teachers});
+            await this.subjectModel.updateOne({_id: subject._id},{teachers: subject.teachers})
         }
         return subject;
     }

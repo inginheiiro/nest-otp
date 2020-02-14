@@ -16,4 +16,9 @@ export class UserService {
         return await this.usersModel.find({_id: {$in: ids}});
     }
 
+    async getUserByID(id: string ): Promise<User> {
+        this.logger.debug(`Get User By ID: ${id}`);
+        return await this.usersModel.find({_id: id});
+    }
+
 }

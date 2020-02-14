@@ -3,9 +3,10 @@ import {GraphQLModule} from '@nestjs/graphql';
 import {AuthModule} from './auth/auth.module';
 import {EasyconfigModule} from 'nestjs-easyconfig';
 import {MongooseModule} from '@nestjs/mongoose';
-import {GraphQLDate,GraphQLDateTime} from 'graphql-iso-date';
-import {TeachersModule} from './modules/teachers/teachers.module';
+import {GraphQLDate, GraphQLDateTime} from 'graphql-iso-date';
 import {SubjectModule} from './modules/subjects/subject.module';
+import {ClassModule} from './modules/classes/class.module';
+import {StudentModule} from './modules/students/student.module';
 
 
 @Module({
@@ -21,7 +22,7 @@ import {SubjectModule} from './modules/subjects/subject.module';
             typePaths: ['./**/*.graphql'],
             installSubscriptionHandlers: true,
             context: ({req}) => ({req}),
-            resolvers: {Date: GraphQLDate,DateTime: GraphQLDateTime},
+            resolvers: {Date: GraphQLDate, DateTime: GraphQLDateTime},
             debug: true,
             playground: true,
             tracing: true,
@@ -32,7 +33,8 @@ import {SubjectModule} from './modules/subjects/subject.module';
         }),
         AuthModule,
         SubjectModule,
-        TeachersModule
+        StudentModule,
+        ClassModule
     ],
 })
 export class AppModule {

@@ -32,3 +32,9 @@ input  UserInput {
     roles: [String]
 }
 
+
+extend type Query {
+    getLoggedUserData: User
+}
+
+

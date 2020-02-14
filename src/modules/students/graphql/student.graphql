@@ -1,0 +1,22 @@
+
+type Student {
+    _id: ID!,
+    nr: Int
+    name: String!
+    birthDate: Date!
+    photo: String
+
+}
+
+input  StudentInput{
+    id: ID
+    nr: Int!
+    name: String!
+    birthDate: Date!
+    photo: String
+}
+
+
+extend type Mutation {
+    addOrUpdateStudent(student: StudentInput): Student!
+}

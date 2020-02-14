@@ -2,8 +2,7 @@ import {Injectable, Logger} from '@nestjs/common';
 import {AuthenticationError} from 'apollo-server-errors';
 import {JwtService} from '@nestjs/jwt';
 import {AlreadyExists, LoginResult, NotFound, Register, RegisterResult, User} from '../graphql.schema';
-import * as cacheManager from 'memory-cache'
-import * as OTP from 'otplib';
+import {authenticator} from '@otplib/preset-default';
 import * as QRCode from 'qrcode';
 import {Email} from '../common/utils/mail';
 import {InjectModel} from '@nestjs/mongoose';
@@ -14,12 +13,16 @@ import {OAuth2Client} from 'google-auth-library';
 export class AuthService {
 
     private readonly logger = new Logger(AuthService.name);
-    private readonly cache = new cacheManager.Cache();
+    private readonly SECRET = process.env.OTP_SECRET;
 
     constructor(
         @InjectModel('Users') private readonly usersModel: Model,
         private readonly jwtService: JwtService
     ) {
+        authenticator.options = {
+            step: parseInt(process.env.OTP_STEP, 10),
+            window: 0,
+        };
     }
 
 
@@ -59,7 +62,7 @@ export class AuthService {
         if (!user) {
             user = new this.usersModel({
                 email: ticket.getPayload().email,
-                secretOTP: OTP.authenticator.generateSecret(),
+                secretOTP: this.SECRET,
                 name: ticket.getPayload().name,
                 photo: ticket.getPayload().picture
             });
@@ -95,7 +98,7 @@ export class AuthService {
         }
 
         const emailUtil: Email = new Email();
-        const data = await this.generateOTPData(email, user.secretOTP);
+        const data = await this.generateOTPData(email, this.SECRET);
         emailUtil.sendOTP(process.env.MAIL_USER, email, 'Login Token Verification', data);
 
         const result: LoginResult = {
@@ -121,13 +124,7 @@ export class AuthService {
 
         const emailUtil: Email = new Email();
 
-        if (this.cache.get(email)) {
-            this.logger.debug(`clearing secret cache for  ${email}`);
-            this.cache.del(email);
-        }
-
-        this.cache.put(email, OTP.authenticator.generateSecret());
-        const data = await this.generateOTPData(email, this.cache.get(email));
+        const data = await this.generateOTPData(email, this.SECRET);
 
         emailUtil.sendOTP(process.env.MAIL_USER, email, 'Registration Token Verification', data);
         const result: Register = {
@@ -146,31 +143,18 @@ export class AuthService {
 
         this.logger.debug(`INITIAL Token: ${token} Key!`);
         let user = await this.usersModel.findOne({email});
-        let secret = null;
-        if (!user) {
-            const _ = this.cache.get(email);
-            if (!_) {
-                this.logger.warn(`Invalid Token Verification`);
-                throw new AuthenticationError('Invalid token verification!');
-            }
-            secret = _;
-        } else {
-            secret = user.secretOTP;
-        }
+        const isValid = authenticator.check(token, this.SECRET);
 
-        const isValid = OTP.authenticator.check(token, secret);
         if (!isValid) {
             this.logger.warn(`Invalid Token: ${token} Key!`);
             throw new AuthenticationError('Invalid validation token key!');
         }
 
         if (!user) {
-            user = new this.usersModel({email, secretOTP: secret});
+            this.logger.debug(`Saving User: ${email} !`);
+            user = new this.usersModel({email});
             user.save();
         }
-
-        // Invalidate from MemoryCache
-        this.cache.del(email);
 
         this.logger.debug(`VALID Token: ${token} Key!`);
 
@@ -200,12 +184,9 @@ export class AuthService {
 
     private async generateOTPData(email: string, secret: string): Promise<any> {
 
-        OTP.authenticator.options = {
-            step: parseInt(process.env.OTP_STEP, 10),
-        };
 
-        const otpauth = OTP.authenticator.keyuri(email, 'OTP', secret);
-        const token = OTP.authenticator.generate(secret);
+        const otpauth = authenticator.keyuri(email, 'OTP', secret);
+        const token = authenticator.generate(secret);
         const qrcode = await QRCode.toDataURL(otpauth);
 
         return {

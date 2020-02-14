@@ -9,6 +9,7 @@ import {GqlAuthGuard, HttpAuthGuard, WsAuthGuard} from './guards/auth.guard';
 import {EasyconfigModule} from 'nestjs-easyconfig';
 import {UserService} from './user.service';
 import {UsersSchema} from '../MongoSchemas/schemas/users';
+import {UserResolvers} from './resolvers/user.resolvers';
 
 @Module({
     imports: [
@@ -28,6 +29,7 @@ import {UsersSchema} from '../MongoSchemas/schemas/users';
         WsAuthGuard,
         GqlAuthGuard,
         AuthResolvers,
+        UserResolvers,
         RegisterResultResolvers,
         LoginResultResolvers
     ],

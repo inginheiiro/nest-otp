@@ -5,18 +5,30 @@
  */
 
 /* tslint:disable */
+export class ClassInput {
+    id?: string;
+    name: string;
+    year: number;
+    managers?: string[];
+    students?: string[];
+    subjects?: string[];
+    start: Date;
+    end: Date;
+}
+
+export class StudentInput {
+    id?: string;
+    nr: number;
+    name: string;
+    birthDate: Date;
+    photo?: string;
+}
+
 export class SubjectInput {
     id?: string;
     name: string;
     description: string;
     teachers?: string[];
-    start: Date;
-    end: Date;
-}
-
-export class TeacherInput {
-    id?: string;
-    name: string;
 }
 
 export class UserInput {
@@ -32,6 +44,17 @@ export class AlreadyExists {
     reason?: string;
 }
 
+export class Class {
+    _id: string;
+    name: string;
+    year: number;
+    managers?: User[];
+    students?: User[];
+    subjects?: Subject[];
+    start: Date;
+    end: Date;
+}
+
 export class InvalidToken {
     reason?: string;
 }
@@ -41,15 +64,19 @@ export class Login {
 }
 
 export abstract class IMutation {
+    abstract addOrUpdateClass(data?: ClassInput): Class | Promise<Class>;
+
+    abstract joinStudentsToClass(classId: string, studentIds?: string[]): Class | Promise<Class>;
+
+    abstract joinManagersToClass(classId: string, teacherIds?: string[]): Class | Promise<Class>;
+
+    abstract addOrUpdateStudent(student?: StudentInput): Student | Promise<Student>;
+
     abstract addOrUpdateSubject(subject?: SubjectInput): Subject | Promise<Subject>;
 
     abstract joinTeachersToSubject(subjectId: string, teacherIds?: string[]): Subject | Promise<Subject>;
 
     abstract deleteSubject(id?: string): boolean | Promise<boolean>;
-
-    abstract addOrUpdateTeacher(teacher?: TeacherInput): Teachers | Promise<Teachers>;
-
-    abstract deleteTeacher(id?: string): boolean | Promise<boolean>;
 }
 
 export class NotFound {
@@ -67,17 +94,23 @@ export abstract class IQuery {
 
     abstract ok(email: string): string | Promise<string>;
 
+    abstract getLoggedUserData(): User | Promise<User>;
+
     abstract getSubjectsByIds(ids?: string[]): Subject[] | Promise<Subject[]>;
 
     abstract getSubjects(): Subject[] | Promise<Subject[]>;
-
-    abstract getTeachersByIds(ids?: string[]): Teachers[] | Promise<Teachers[]>;
-
-    abstract getTeachers(): Teachers[] | Promise<Teachers[]>;
 }
 
 export class Register {
     QRCode: string;
+}
+
+export class Student {
+    _id: string;
+    nr?: number;
+    name: string;
+    birthDate: Date;
+    photo?: string;
 }
 
 export class Subject {
@@ -85,13 +118,6 @@ export class Subject {
     name: string;
     description?: string;
     teachers?: User[];
-    start: Date;
-    end: Date;
-}
-
-export class Teachers {
-    id: string;
-    name: string;
 }
 
 export class User {

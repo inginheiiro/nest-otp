@@ -1,0 +1,31 @@
+scalar Date
+
+type Class {
+    _id: ID!,
+    name: String!
+    year: Int!
+    managers: [User]
+    students: [User]
+    subjects :[Subject]
+    start: Date!,
+    end: Date!
+}
+
+input  ClassInput{
+    id: ID
+    name: String!
+    year: Int!
+    managers: [ID]
+    students: [ID]
+    subjects: [ID]
+    start: Date!
+    end: Date!
+}
+
+
+
+type Mutation {
+    addOrUpdateClass(data: ClassInput): Class!
+    joinStudentsToClass(classId: String!, studentIds: [String!]): Class
+    joinManagersToClass(classId: String!, teacherIds: [String!]): Class
+}
