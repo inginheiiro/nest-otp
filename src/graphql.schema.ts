@@ -5,6 +5,12 @@
  */
 
 /* tslint:disable */
+export class AddressInput {
+    name?: string;
+    latitude?: number;
+    longitude?: number;
+}
+
 export class ClassInput {
     id?: string;
     name: string;
@@ -36,8 +42,16 @@ export class UserInput {
     name?: string;
     phone?: string;
     photo?: string;
+    nif?: string;
+    address?: AddressInput;
     delete?: boolean;
     roles?: string[];
+}
+
+export class Address {
+    name?: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 export class AlreadyExists {
@@ -126,6 +140,8 @@ export class User {
     name?: string;
     phone?: string;
     photo?: string;
+    nif?: string;
+    address?: Address;
     delete?: boolean;
     roles: string[];
 }

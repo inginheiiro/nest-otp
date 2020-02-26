@@ -1,4 +1,18 @@
 
+type Address {
+    name: String
+    latitude: Float
+    longitude: Float
+}
+
+
+input AddressInput {
+    name: String
+    latitude: Float
+    longitude: Float
+}
+
+
 type User {
     # The database user
     _id: ID!
@@ -10,6 +24,10 @@ type User {
     phone: String
     # The photo of the user
     photo: String
+    # The nif of the user
+    nif: String
+    # The address of the user
+    address: Address
     # Is the user deleted?
     delete: Boolean
     # user roles
@@ -26,7 +44,11 @@ input  UserInput {
     phone: String
     # The photo of the user
     photo: String
-    # Is the user deleted?
+    # The nif of the user
+    nif: String
+    # The address of the user
+    address: AddressInput
+    # The nif of the user
     delete: Boolean
     # user roles
     roles: [String]

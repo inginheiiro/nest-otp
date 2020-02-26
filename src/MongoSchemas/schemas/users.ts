@@ -4,6 +4,7 @@ import {RolesEnum} from '../rolesEnum';
 
 export const UsersSchema = new Schema({
     name: {type: String, required: false},
+    nif: {type: Number, required: false},
     phone: {type: String, required: false},
     photo: {
         type: String,
@@ -16,6 +17,20 @@ export const UsersSchema = new Schema({
         required: true,
         index: true,
         unique: true,
+    },
+    address: {
+        name: {
+            type: String,
+            required: false,
+        },
+        latitude: {
+            type: Number,
+            required: false
+        },
+        longitude: {
+            type: Number,
+            required: false
+        },
     },
     deleted: {type: Boolean, required: true, default: false},
     roles: {

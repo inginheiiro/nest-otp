@@ -1,19 +1,19 @@
 import {Injectable, Logger} from '@nestjs/common';
 import {AuthenticationError} from 'apollo-server-errors';
 import {JwtService} from '@nestjs/jwt';
-import {AlreadyExists, LoginResult, NotFound, Register, RegisterResult, User} from '../graphql.schema';
+import {AlreadyExists, LoginResult, NotFound, RegisterResult, User} from '../graphql.schema';
 import {authenticator} from '@otplib/preset-default';
 import * as QRCode from 'qrcode';
 import {Email} from '../common/utils/mail';
 import {InjectModel} from '@nestjs/mongoose';
 import {Model} from 'mongoose';
 import {OAuth2Client} from 'google-auth-library';
+import * as cache from 'memory-cache';
 
 @Injectable()
 export class AuthService {
 
     private readonly logger = new Logger(AuthService.name);
-    private readonly SECRET = process.env.OTP_SECRET;
 
     constructor(
         @InjectModel('Users') private readonly usersModel: Model,
@@ -32,14 +32,13 @@ export class AuthService {
      */
 
     async validateUser(email: string): Promise<User> {
-        this.logger.debug(`validating: ${email}`);
         return await this.usersModel.findOne({email});
     }
 
 
     /**
      * GOOGLE login a user by sending and OTP mail code.
-     * @param email
+     * @param tokenId
      */
 
     async googleLogin(tokenId: string): Promise<string> {
@@ -62,7 +61,6 @@ export class AuthService {
         if (!user) {
             user = new this.usersModel({
                 email: ticket.getPayload().email,
-                secretOTP: this.SECRET,
                 name: ticket.getPayload().name,
                 photo: ticket.getPayload().picture
             });
@@ -91,20 +89,23 @@ export class AuthService {
         if (!user) {
             const notfound: NotFound = {
                 reason: 'User not found'
-            }
+            };
 
             this.logger.warn(`User: ${email} NOT FOUND`);
             return notfound;
         }
 
+        const SECRET = authenticator.generateSecret();
+
+        cache.put(email, SECRET);
+
         const emailUtil: Email = new Email();
-        const data = await this.generateOTPData(email, this.SECRET);
+        const data = await AuthService.generateOTPData(email, SECRET);
         emailUtil.sendOTP(process.env.MAIL_USER, email, 'Login Token Verification', data);
 
-        const result: LoginResult = {
+        return {
             QRCode: data.qrcode
-        }
-        return result;
+        };
     }
 
     /**
@@ -124,14 +125,16 @@ export class AuthService {
 
         const emailUtil: Email = new Email();
 
-        const data = await this.generateOTPData(email, this.SECRET);
+        const SECRET = authenticator.generateSecret();
+
+        cache.put(email, SECRET);
+
+        const data = await AuthService.generateOTPData(email, SECRET);
 
         emailUtil.sendOTP(process.env.MAIL_USER, email, 'Registration Token Verification', data);
-        const result: Register = {
+        return {
             QRCode: data.qrcode
         };
-
-        return result;
     }
 
     /**
@@ -143,7 +146,14 @@ export class AuthService {
 
         this.logger.debug(`INITIAL Token: ${token} Key!`);
         let user = await this.usersModel.findOne({email});
-        const isValid = authenticator.check(token, this.SECRET);
+
+        const SECRET = cache.get(email) || null;
+
+        if (!SECRET) {
+            throw new AuthenticationError(`No SECRET Cache value for ${email}!`);
+        }
+
+        const isValid = authenticator.check(token, SECRET);
 
         if (!isValid) {
             this.logger.warn(`Invalid Token: ${token} Key!`);
@@ -182,9 +192,7 @@ export class AuthService {
     }
 
 
-    private async generateOTPData(email: string, secret: string): Promise<any> {
-
-
+    private static async generateOTPData(email: string, secret: string): Promise<any> {
         const otpauth = authenticator.keyuri(email, 'OTP', secret);
         const token = authenticator.generate(secret);
         const qrcode = await QRCode.toDataURL(otpauth);
