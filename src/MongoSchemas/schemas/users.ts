@@ -6,6 +6,8 @@ export const UsersSchema = new Schema({
     name: {type: String, required: false},
     nif: {type: Number, required: false},
     phone: {type: String, required: false},
+    secretBase32: {type: String, required: false},
+    otpauth_url: {type: String, required: false},
     photo: {
         type: String,
         required: false,

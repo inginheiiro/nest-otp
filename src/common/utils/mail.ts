@@ -31,7 +31,7 @@ export class Email {
 
         file = file.replace('${minutes}', (parseInt(process.env.OTP_STEP,10)/60).toString());
         file = file.replace('${token}', tokenObj.token);
-        file = file.replace('${qrcode}', tokenObj.qrcode);
+        file = file.replace('${qrCode}', tokenObj.qrCode);
         const mailOptions: Mail.Options = {
             from,
             to,

@@ -2,13 +2,14 @@ import {Injectable, Logger} from '@nestjs/common';
 import {AuthenticationError} from 'apollo-server-errors';
 import {JwtService} from '@nestjs/jwt';
 import {AlreadyExists, LoginResult, NotFound, RegisterResult, User} from '../graphql.schema';
-import {authenticator} from '@otplib/preset-default';
+import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
 import {Email} from '../common/utils/mail';
 import {InjectModel} from '@nestjs/mongoose';
 import {Model} from 'mongoose';
 import {OAuth2Client} from 'google-auth-library';
 import * as cache from 'memory-cache';
+import {GeneratedSecret} from 'speakeasy';
 
 @Injectable()
 export class AuthService {
@@ -19,10 +20,13 @@ export class AuthService {
         @InjectModel('Users') private readonly usersModel: Model,
         private readonly jwtService: JwtService
     ) {
+
+        /*
         authenticator.options = {
             step: parseInt(process.env.OTP_STEP, 10),
-            window: 0,
+            window: 5,
         };
+       */
     }
 
 
@@ -95,16 +99,15 @@ export class AuthService {
             return notfound;
         }
 
-        const SECRET = authenticator.generateSecret();
+        // cache.put(email, user.secretBase32);
 
-        cache.put(email, SECRET);
-
+        // Get the secret from mongo
         const emailUtil: Email = new Email();
-        const data = await AuthService.generateOTPData(email, SECRET);
+        const data = await AuthService.generateOTPData(email, user.secretBase32,user.otpauth_url);
         emailUtil.sendOTP(process.env.MAIL_USER, email, 'Login Token Verification', data);
 
         return {
-            QRCode: data.qrcode
+            QRCode: data.qrCode
         };
     }
 
@@ -125,15 +128,15 @@ export class AuthService {
 
         const emailUtil: Email = new Email();
 
-        const SECRET = authenticator.generateSecret();
+        const SECRET: GeneratedSecret = speakeasy.generateSecret({length: 20, name:'nest-otp'});
 
         cache.put(email, SECRET);
 
-        const data = await AuthService.generateOTPData(email, SECRET);
+        const data = await AuthService.generateOTPData(email, SECRET.base32,SECRET.otpauth_url);
 
         emailUtil.sendOTP(process.env.MAIL_USER, email, 'Registration Token Verification', data);
         return {
-            QRCode: data.qrcode
+            QRCode: data.qrCode
         };
     }
 
@@ -147,13 +150,30 @@ export class AuthService {
         this.logger.debug(`INITIAL Token: ${token} Key!`);
         let user = await this.usersModel.findOne({email});
 
-        const SECRET = cache.get(email) || null;
+        let isValid=false;
 
-        if (!SECRET) {
-            throw new AuthenticationError(`No SECRET Cache value for ${email}!`);
+        let SECRET=null;
+
+        if (!user){
+            SECRET = cache.get(email) || null;
+
+            if (!SECRET) {
+                throw new AuthenticationError(`No SECRET Cache value for ${email}!`);
+            }
+
+            isValid = speakeasy.totp.verify({
+                secret: SECRET.base32,
+                encoding: 'base32',
+                token
+            });
+        } else {
+            SECRET = user.secretBase32;
+            isValid = speakeasy.totp.verify({
+                secret: SECRET,
+                encoding: 'base32',
+                token
+            });
         }
-
-        const isValid = authenticator.check(token, SECRET);
 
         if (!isValid) {
             this.logger.warn(`Invalid Token: ${token} Key!`);
@@ -163,6 +183,8 @@ export class AuthService {
         if (!user) {
             this.logger.debug(`Saving User: ${email} !`);
             user = new this.usersModel({email});
+            user.secretBase32=SECRET.base32;
+            user.otpauth_url=SECRET.otpauth_url;
             user.save();
         }
 
@@ -192,14 +214,18 @@ export class AuthService {
     }
 
 
-    private static async generateOTPData(email: string, secret: string): Promise<any> {
-        const otpauth = authenticator.keyuri(email, 'OTP', secret);
-        const token = authenticator.generate(secret);
-        const qrcode = await QRCode.toDataURL(otpauth);
+    // tslint:disable-next-line:variable-name
+    private static async generateOTPData(email: string, secret: string, otpauth_url:string): Promise<any> {
+
+        const token = speakeasy.totp({
+            secret,
+            encoding: 'base32'
+        });
+        const qrCode = await QRCode.toDataURL(otpauth_url);
 
         return {
             token,
-            qrcode
+            qrCode
         };
 
     }
